@@ -1,0 +1,170 @@
+<?xml version="1.0"?>
+<robot name="my_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="commom_properties.xacro" /> <!-- A inclusão do properties antes permite que seja usado em todos os arquivos abaixo -->
+    
+    <xacro:property name="body_length" value = "0.6"/>
+    <xacro:property name="body_width" value ="0.4"/>
+    <xacro:property name="body_height" value="0.2"/>
+    <xacro:property name="leg_radius" value ="0.05"/>
+    <xacro:property name="upper_leg_length" value ="0.15"/>
+    <xacro:property name="lower_leg_length" value ="0.15"/>
+    <xacro:property name="feet_radius" value ="0.05"/>
+
+
+    <link name="body_link">
+        <visual>
+            <geometry>
+                <box size="${body_length} ${body_width} ${body_height}"/>
+            </geometry>
+            <origin xyz="0 0 ${body_height/2.0}" rpy="0 0 0"/>
+            <material name="green"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${body_length} ${body_width} ${body_height}"/>
+            </geometry>
+            <origin xyz="0 0 ${body_height/2.0}" rpy="0 0 0"/>
+        </collision>
+        <xacro:box_inertia m="5.0" l="${body_length}" w="${body_width}" h="${body_height}"
+                            xyz="0 0 ${body_height/2.0}" rpy="0 0 0" />
+    </link>
+
+   <xacro:macro name="upper_leg_link" params = "prefix">
+        <link name="${prefix}_upper_leg_link">
+            <visual>
+                <geometry>
+                    <cylinder radius="${leg_radius}" length="${upper_leg_length}"/>
+                </geometry>
+                <origin xyz="0 0 ${-upper_leg_length/2.0}" rpy="0 0 0"/>
+                <material name="grey"/>
+            </visual>
+            <collision>
+                <geometry>
+                    <cylinder radius="${leg_radius}" length="${upper_leg_length}"/>
+                </geometry>
+                <origin xyz="0 0 ${-upper_leg_length/2.0}" rpy="0 0 0"/>
+            </collision>
+            <xacro:cylinder_inertia m="1.0" r="${leg_radius}" h="${upper_leg_length}"
+                                     xyz="0 0 0" rpy="${pi/2.0} 0 0"/>
+        </link>
+    </xacro:macro>
+
+    <xacro:upper_leg_link prefix="RR"/>
+    <xacro:upper_leg_link prefix="RL"/>
+    <xacro:upper_leg_link prefix="FR"/>
+    <xacro:upper_leg_link prefix="FL"/>
+
+    <joint name="RR_upper_leg_joint" type="continuous">
+        <parent link="body_link"/>
+        <child link="RR_upper_leg_link"/>
+        <origin xyz = "${-body_width/2.0} ${-(body_width/2.0+leg_radius)} ${body_height/2.0}" rpy = "0 0 0"/>
+        <axis xyz = "0 1 0"/>
+    </joint>
+
+    <joint name="RL_upper_leg_joint" type="continuous">
+        <parent link="body_link"/>
+        <child link="RL_upper_leg_link"/>
+        <origin xyz = "${-body_width/2.0} ${(body_width/2.0+leg_radius)} ${body_height/2.0}" rpy = "0 0 0"/>
+        <axis xyz = "0 1 0"/>
+    </joint>
+
+    <joint name="FR_upper_leg_joint" type="continuous">
+        <parent link="body_link"/>
+        <child link="FR_upper_leg_link"/>
+        <origin xyz = "${body_width/2.0} ${-(body_width/2.0+leg_radius)} ${body_height/2.0}" rpy = "0 0 0"/>
+        <axis xyz = "0 1 0"/>
+    </joint>
+
+    <joint name="FL_upper_leg_joint" type="continuous">
+        <parent link="body_link"/>
+        <child link="FL_upper_leg_link"/>
+        <origin xyz = "${body_width/2.0} ${(body_width/2.0+leg_radius)} ${body_height/2.0}" rpy = "0 0 0"/>
+        <axis xyz = "0 1 0"/>
+    </joint>
+
+
+    <xacro:macro name="lower_leg_link" params = "prefix">
+        <link name="${prefix}_lower_leg_link">
+            <visual>
+                <geometry>
+                    <cylinder radius="${leg_radius}" length="${lower_leg_length}"/>
+                </geometry>
+                <origin xyz="0 0 ${-lower_leg_length/2.0}" rpy="0 0 0"/>
+                <material name="grey"/>
+            </visual>
+            <collision>
+                <geometry>
+                    <cylinder radius="${leg_radius}" length="${lower_leg_length}"/>
+                </geometry>
+                <origin xyz="0 0 ${-lower_leg_length/2.0}" rpy="0 0 0"/>
+            </collision>
+            <xacro:cylinder_inertia m="1.0" r="${leg_radius}" h="${lower_leg_length}"
+                                     xyz="0 0 0" rpy="${pi/2.0} 0 0"/>
+        </link>
+    </xacro:macro>
+
+    <xacro:lower_leg_link prefix="RR"/>
+    <xacro:lower_leg_link prefix="RL"/>
+    <xacro:lower_leg_link prefix="FR"/>
+    <xacro:lower_leg_link prefix="FL"/>
+
+
+    <xacro:macro name="lower_leg_joint" params = "prefix">
+        <joint name="${prefix}_lower_leg_joint" type="continuous">
+            <parent link="${prefix}_upper_leg_link"/>
+            <child link="${prefix}_lower_leg_link"/>
+            <origin xyz = "0 0 ${-upper_leg_length}" rpy = "0 0 0"/>
+            <axis xyz = "0 1 0"/>
+        </joint>
+    </xacro:macro>
+
+
+    <xacro:lower_leg_joint prefix="RR"/>
+    <xacro:lower_leg_joint prefix="RL"/>
+    <xacro:lower_leg_joint prefix="FR"/>
+    <xacro:lower_leg_joint prefix="FL"/>
+
+    
+    <xacro:macro name="foot_link" params = "prefix">
+        <link name = "${prefix}_foot_link">
+            <visual>
+                <geometry>
+                    <sphere radius = "${feet_radius}"/>
+                    <origin xyz = "0 0 0" rpy = "0 0 0"/>
+                </geometry>
+                <material name="grey"/>
+            </visual>
+            <collision>
+                <geometry>
+                    <sphere radius = "${feet_radius}"/>
+                    <origin xyz = "0 0 0" rpy = "0 0 0"/>
+                </geometry>
+            </collision>
+            <xacro:sphere_inertia m="0.5" r="${feet_radius}"
+                                xyz = "0 0 0" rpy = "0 0 0"/>
+        </link>
+    </xacro:macro>
+
+    <xacro:foot_link prefix="RR"/>
+    <xacro:foot_link prefix="RL"/>
+    <xacro:foot_link prefix="FR"/>
+    <xacro:foot_link prefix="FL"/>
+
+
+    <xacro:macro name="foot_joint" params = "prefix">
+        <joint name="${prefix}_foot_joint" type="fixed">
+            <parent link = "${prefix}_lower_leg_link"/>
+            <child link = "${prefix}_foot_link"/>
+            <origin xyz = "0 0 ${-lower_leg_length}" rpy = "0 0 0"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:foot_joint prefix="RR"/>
+    <xacro:foot_joint prefix="RL"/>
+    <xacro:foot_joint prefix="FR"/>
+    <xacro:foot_joint prefix="FL"/>
+
+</robot>
+
+ 
